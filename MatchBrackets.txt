@@ -1,0 +1,56 @@
+#include<iostream>
+using namespace std;
+#include<stack>
+
+void Bracket_match(char* p,size_t size)
+{
+	stack<char> s;
+	for (size_t i = 0; i < size; ++i)
+	{
+		if (p[i] == '(' || p[i] == '[' || p[i] == '{') // 将左括号入栈
+		{
+			s.push(p[i]);
+		}
+		else if (p[i] == ')' || p[i] == ']' || p[i] == '}')
+		{
+			if (s.empty())//如果栈为空，右括号多
+			{
+				cout << "右括号多于左括号" << endl;
+				return;
+			}
+			if (s.top() == '('&& p[i] == ')' || s.top() == '['&& p[i] == ']' || s.top() == '{'&& p[i] == '}')//栈不空，如果栈顶括号与读到的括号匹配，就将栈顶元素出栈
+			{
+				s.pop();
+				continue;
+			}
+			else//栈顶括号与读到的括号不匹配
+			{
+				cout << "括号次序匹配不正确" << endl;
+				return;
+			}
+		}
+	}
+	//上面循环执行完，如果栈空，则匹配正确，反之左括号多
+	if (s.empty())
+	{
+		cout << "括号匹配正确" << endl;
+	}
+	else
+	{
+		cout << "左括号多于右括号" << endl;
+	}
+}
+
+int main()
+{
+	char a[] = "(())abc{[(])}";
+	Bracket_match(a,sizeof(a)/sizeof(a[0]));
+	char b[] = "(()))abc{[]}";
+	Bracket_match(b, sizeof(b) / sizeof(b[0]));
+	char c[] = "(()()abc{[]}";
+	Bracket_match(c, sizeof(c) / sizeof(c[0]));
+	char d[] = "(())abc{[]()}";
+	Bracket_match(d, sizeof(d) / sizeof(d[0]));
+	system("pause");
+	return 0;
+}
