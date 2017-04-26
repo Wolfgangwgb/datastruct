@@ -1,0 +1,124 @@
+#include<iostream>
+using namespace std;
+#include<stack>
+
+//用两个栈构造一个队列
+template <class T>
+class Queue
+{
+public:
+	Queue()
+	{}
+	void Push(const T& x)//尾插
+	{
+		_s1.push(x);
+	}
+	void Pop()//头删
+	{
+		if (_s2.empty() )
+		{
+			if (!(_s1.empty()))
+			{
+				Moves1tos2();
+				_s2.pop();
+			}
+		}
+		else 
+		{
+			_s2.pop();
+		}
+	}
+	T& Front()//返回第一个元素
+	{
+		if (_s2.empty())
+		{
+			if (!(_s1.empty()))
+			{
+				Moves1tos2();
+				return _s2.top();
+			}
+		}
+		else
+		{
+			return _s2.top();
+		}
+	}
+
+	T& Back()//返回最后一个元素
+	{
+		if (_s1.empty())
+		{
+			if (!(_s2.empty()))
+			{
+				Moves2tos1();
+				return _s1.top();
+			}
+		}
+		else 
+		{
+			return _s1.top();
+		}
+	}
+	size_t Size()
+	{
+		if (!(_s1.empty()) && !(_s2.empty()))
+			return (_s1.size()) + (_s2.size());
+		if (!(_s1.empty()))
+			return _s1.size();
+		if (!(_s2.empty()))
+			return _s2.size();
+	}
+	bool Empty()//判断队列是否为空
+	{
+		if (_s1.empty() && _s2.empty())
+			return true;
+		return false;
+	}
+private:
+	void Moves1tos2()//移动stack1的所有元素到stack2
+	{
+		while (!(_s1.empty()))
+		{
+			_s2.push(_s1.top());
+			_s1.pop();
+		}
+	}
+	void Moves2tos1()
+	{
+		while (!(_s2.empty()))
+		{
+			_s1.push(_s2.top());
+			_s2.pop();
+		}
+	}
+private:
+	stack<T> _s1;
+	stack<T> _s2;
+};
+
+void Test()
+{
+	Queue<int> q;
+	q.Push(1);
+	q.Push(2);
+	q.Push(3);
+	q.Push(4);
+	cout << q.Front() << endl;
+	cout << q.Back() << endl;
+	cout << q.Size() << endl;
+	q.Pop();
+	q.Pop();
+	q.Pop();
+	cout << q.Size() << endl;
+	q.Push(5);
+	cout<<q.Size()<<endl;
+	q.Pop();
+
+}
+int main()
+{
+	Test();
+	return 0;
+}
+
+
