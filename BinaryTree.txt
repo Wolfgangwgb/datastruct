@@ -1,0 +1,189 @@
+#include<iostream>
+using namespace std;
+#include<queue>
+
+//构建一个结点
+template<class T>
+struct BinaryTreeNode
+{
+	BinaryTreeNode(const T& data)
+	: _data(data)
+	, _pLeft(NULL)
+	, _pRight(NULL)
+	{}
+
+	T _data;
+	BinaryTreeNode<T>* _pLeft;    // 左孩子
+	BinaryTreeNode<T>* _pRight;   // 右孩子
+};
+
+template<class T>
+class BinaryTree
+{
+	typedef BinaryTreeNode<T> Node;
+public:
+	BinaryTree()  
+		: _pRoot(NULL)
+	{}
+
+	BinaryTree(const T array[], size_t size, const T& invalid)
+	{
+		// 创建树
+		size_t index = 0;
+		_CreateTree(_pRoot, array, size, index, invalid);
+	}
+
+	BinaryTree(const BinaryTree<T>& t)//拷贝构造
+	{
+		_pRoot = _CopyBinaryTree(t._pRoot);
+	}
+//重载赋值运算符注意点：1.返回值(该类型的引用)2.参数(该类型的常量引用)3.是不是自己给自己赋值4.释放原来的空间
+	BinaryTree<T>& operator=(const BinaryTree<T>& t)
+	{
+		if (this == &t) //判断是不是自己给自己赋值
+			return *this;
+		_DestroyTree(_pRoot);//将原来的清空
+		_pRoot = _CopyBinaryTree(t._pRoot);//根拷贝构造一样
+		return *this;
+	}
+
+	// 先序遍历：根左右
+	void PreOrder()
+	{
+		_PreOrder(_pRoot);//进行一层封装，安全
+	}
+
+	// 中序遍历：左根右
+	void InOrder()
+	{
+		_InOrder(_pRoot);
+	}
+
+	// 后续遍历：左右根
+	void PostOrder()
+	{
+		_PostOrder(_pRoot);
+	}
+
+	// 层序遍历
+	void LevelOrder()
+	{
+		queue<Node*> q;//用一个先进先出的队列辅助
+		q.push(_pRoot);//头结点入队列
+		while (!q.empty())
+		{
+			_pRoot = q.front();//取队列中的第一个元素为当前头结点
+			cout << _pRoot->_data << " ";
+
+			if (_pRoot->_pLeft)//左孩子不为空入队列
+				q.push(_pRoot->_pLeft);
+			if (_pRoot->_pRight)//右孩子不为空入队列
+				q.push(_pRoot->_pRight);
+			q.pop();//访问玩他的所有结点将他出队列
+		}
+	}
+	~BinaryTree()
+	{
+		_DestroyTree(_pRoot);
+	}
+private:
+	//利用先序创建
+	void _CreateTree(Node*& pRoot, const T array[], size_t size, size_t& index, const T& invalid)
+	{
+		if (index < size && array[index] != invalid)
+		{
+			pRoot = new Node(array[index]);
+			_CreateTree(pRoot->_pLeft, array, size, ++index, invalid);
+			_CreateTree(pRoot->_pRight, array, size, ++index, invalid);
+		}
+	}
+
+	Node* _CopyBinaryTree(Node* pRoot)//先序拷贝
+	{
+		Node* NewNode = NULL;
+		if (NULL != pRoot)
+		{
+			NewNode = new Node(pRoot->_data);
+			NewNode->_pLeft =  _CopyBinaryTree(pRoot->_pLeft);
+			NewNode->_pRight = _CopyBinaryTree(pRoot->_pRight);
+		}
+		return NewNode;
+	}
+
+	void _DestroyTree(Node* &pRoot)//后序销毁
+	{
+		if (NULL != pRoot)
+		{
+			_DestroyTree(pRoot->_pLeft);
+			_DestroyTree(pRoot->_pRight);
+			delete pRoot;
+			pRoot = NULL;
+		}
+	}
+
+	void _PreOrder(Node* pRoot)
+	{
+		if (NULL != pRoot)
+		{
+			cout << pRoot->_data << " ";//根
+			_PreOrder(pRoot->_pLeft);//左
+			_PreOrder(pRoot->_pRight);//右
+		}
+	}
+
+	void _InOrder(Node* pRoot)
+	{
+		if (NULL != pRoot)
+		{
+			_InOrder(pRoot->_pLeft);//左
+			cout << pRoot->_data << " ";//根
+			_InOrder(pRoot->_pRight);//右
+		}
+	}
+
+	void _PostOrder(Node* pRoot)
+	{
+		if (NULL != pRoot)
+		{
+			_PostOrder(pRoot->_pLeft);//左
+			_PostOrder(pRoot->_pRight);//右
+			cout << pRoot->_data << " ";//根
+		}
+	}
+
+private:
+	BinaryTreeNode<T>* _pRoot;
+};
+
+
+
+void Test()
+{
+	char* ptr = "124###35##6";
+	BinaryTree<char> bt(ptr, strlen(ptr), '#');
+	BinaryTree<char> bt1(bt);
+
+	BinaryTree<char> bt2;
+	bt2.operator=(bt);
+	bt2.PreOrder();
+	cout << endl;
+	bt2.InOrder();
+	cout << endl;
+	bt2.PostOrder();
+	cout << endl;
+	bt2.LevelOrder();
+	/*
+	bt.PreOrder();
+	//bt1.PreOrder();
+	cout << endl;
+	bt.InOrder();
+	cout << endl;
+	bt.PostOrder();
+	cout << endl;
+	bt.LevelOrder();*/
+}
+int main()
+{
+	Test();
+	return 0;
+}
