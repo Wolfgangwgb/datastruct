@@ -1,0 +1,94 @@
+#include<iostream>
+using namespace std;
+
+template<class T>
+class SymmetricMatrix
+{
+public:
+	SymmetricMatrix(const T* array, size_t N)
+		:_row(N)
+		, _col(N)
+	{
+		size_t idx = 0;
+		_pData = new T[(N*(N+1))>>1];
+		for (size_t i = 0; i < _row; ++i)
+		{
+			for (size_t j = 0; j <= i; ++j)
+			{
+				_pData[idx] = array[i*N+j];
+				++idx;
+			}
+		}
+	}
+	const T& Acess(int row, int col)const
+	{
+		if (row > col)
+		{
+			return _pData[((row*(row + 1)) >> 1) + col];
+		}
+		else
+		{
+			std::swap(row, col);
+			return _pData[((row*(row + 1)) >> 1) + col];
+		}
+	}
+	T& Acess(int row, int col)
+	{
+		if (row > col)
+		{
+			return _pData[((row*(row+1))>>1)+col];
+		}
+		else
+		{
+			std::swap(row,col);
+			return _pData[((row*(row + 1)) >> 1) + col];
+		}
+	}
+	~SymmetricMatrix()
+	{
+		if (_pData)
+		{
+			delete[] _pData;
+			_pData = NULL;
+			_row = 0;
+			_col = 0;
+		}
+	}
+
+	template<class T>
+	friend ostream& operator<<(ostream& _cout, const SymmetricMatrix<T>& sm)
+	{
+		for (size_t i = 0; i < sm._row; ++i)
+		{
+			for (size_t j = 0; j < sm._col; ++j)
+			{
+				cout<<sm.Acess(i, j)<<" ";
+			}
+			cout << endl;
+		}
+		return _cout;
+	}
+
+private:
+	T* _pData;
+	size_t _row;
+	size_t _col;
+};
+
+
+int main()
+{
+	int array[][5] = {
+		{0,1,2,3,4},
+		{1,0,1,2,3},
+		{2,1,0,1,2},
+		{3,2,1,0,1},
+		{4,3,2,1,0}};
+	SymmetricMatrix<int> sm((int*)array,5);
+
+	cout << sm.Acess(2, 0) << endl;
+
+	cout << sm << endl;
+	system("pause");
+	return 0;
+}
