@@ -1,0 +1,222 @@
+#include<iostream>
+using namespace std;
+
+
+//类型萃取
+
+struct _TrueType
+{
+	static bool Get()
+	{
+		return true;
+	}
+};
+
+struct _FalseType
+{
+	static bool Get()
+	{
+		return false;
+	}
+};
+
+template <class _Tp>
+struct TypeTraits
+{
+	typedef _FalseType _IsPODType;
+};
+
+template<>
+struct TypeTraits<bool>
+{
+	typedef _TrueType _IsPODType;
+};
+
+template<>
+struct TypeTraits<int>
+{
+	typedef _TrueType _IsPODType;
+};
+template<>
+struct TypeTraits<unsigned int>
+{
+	typedef _TrueType _IsPODType;
+};
+template<>
+struct TypeTraits<char>
+{
+	typedef _TrueType _IsPODType;
+};
+template<>
+struct TypeTraits<unsigned char>
+{
+	typedef _TrueType _IsPODType;
+};
+template<>
+struct TypeTraits<long>
+{
+	typedef _TrueType _IsPODType;
+};
+template<>
+struct TypeTraits<unsigned long>
+{
+	typedef _TrueType _IsPODType;
+};
+template<>
+struct TypeTraits<short>
+{
+	typedef _TrueType _IsPODType;
+};
+template<>
+struct TypeTraits<float>
+{
+	typedef _TrueType _IsPODType;
+};
+template<>
+struct TypeTraits<double>
+{
+	typedef _TrueType _IsPODType;
+};
+template<>
+struct TypeTraits<long double>
+{
+	typedef _TrueType _IsPODType;
+};
+template<class _Tp>
+struct TypeTraits<_Tp*>
+{
+	typedef _TrueType _IsPODType;
+};
+
+//使用参数推倒得萃取处理
+template <typename T>
+void Copy(const T* src, T* dest, size_t size, _FalseType)
+{
+	cout << typeid(T).name() << endl;
+	for (size_t i = 0; i < size; ++i)
+	{
+		dest[i] = src[i];
+	}
+}
+template <typename T>
+void Copy(const T* src, T* dest, size_t size, _TrueType)
+{
+	cout << typeid(T).name() << endl;
+	memcpy(dest, src, size*sizeof(T));
+}
+
+//实现顺序栈
+template<class T>
+class Stack
+{
+public:
+	Stack()
+		:_pData(0)
+		, _size(0)
+		, _capacity(0)
+	{}
+	Stack(const Stack<T>& s)
+	{
+		CheckCapacity();
+		_pData = s._pData;
+		_size = s._size;
+	}
+	Stack<T>& operator=(const Stack<T>& s)
+	{
+		CheckCapacity();
+		_pData = s._pData;
+		_size = s._size;
+		return *this;
+	}
+	void Push(const T& data)
+	{
+		CheckCapacity();
+		_pData[_size++] = data;
+	}
+	void Pop()
+	{
+		--_size;
+	}
+	bool Empty()const
+	{
+		return 0 == _size;
+	}
+	T& Top()
+	{
+		return _pData[_size-1];
+	}
+	size_t Size()const
+	{
+		return _size;
+	}
+	~Stack()
+	{
+		if (_pData)
+		{
+			delete _pData;
+			_pData = NULL;
+			_size = 0;
+			_capacity = 0;
+		}
+	}
+private:
+	void CheckCapacity()
+	{
+		if (_size == _capacity)
+		{
+			T* pdata = new T[_capacity+4];
+			Copy(_pData, pdata, _size, TypeTraits<T>::_IsPODType());
+			delete[] _pData;
+			_pData = pdata;
+		}
+	}
+
+private:
+	T* _pData;
+	size_t _size;
+	size_t _capacity;
+};
+
+
+void Test()
+{
+	Stack<int> s;
+	Stack<int> s1;
+
+	s.Push(1);
+	s.Push(2);
+	s.Push(3);
+	s1.Push(0);
+	s1.Push(0);
+	s1.Push(0);
+	s1.Push(0);
+	Stack<int> s2(s);
+
+	cout << s.Size() << endl;
+
+	cout << s2.Size() << endl;
+
+	cout << s1.Size() << endl;
+	s = s1;
+
+	cout << s.Size() << endl;
+	cout << s1.Size() << endl;
+	cout << s.Top() << endl;
+	s.Pop();
+	cout << s.Size() << endl;
+	if (s.Empty())
+	{
+		cout << "s非空" << endl;
+	}
+	else
+	{
+		cout << "s空" << endl;
+	}
+}
+
+
+int main()
+{
+	Test();
+	return 0;
+}
