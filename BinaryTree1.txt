@@ -1,0 +1,143 @@
+	void prepoder()//非递归
+	{
+		cout << "PreOrder" << endl;
+		_preorder(_pRoot);
+		cout << endl;
+	}
+	void _preorder(Node* pRoot)
+	{
+		if (NULL == pRoot)
+			return;
+		stack<Node*> s;
+		s.push(pRoot);//头结点入栈
+		while (!s.empty())
+		{
+			Node* pCur = s.top();//栈顶取元素
+			cout << pCur->_data << " ";//访问
+			s.pop();//出栈
+
+			if (pCur->_pRight)//不为空保存
+				s.push(pCur->_pRight);//保存右孩子
+			if (pCur->_pLeft)
+				s.push(pCur->_pLeft);//保存左孩子
+		}
+	}
+	
+	void Inorder()//非递归
+	{
+		cout << "InOrder" << endl;
+		_Inorder(_pRoot);
+		cout << endl;
+	}
+	void _Inorder(Node* pRoot)
+	{
+		if (NULL == pRoot)
+			return;
+		stack<Node*> s;
+		Node* pCur = pRoot;
+		while (pCur || !s.empty())//循环条件
+		{
+			//找到最左边的结点
+			while (pCur)
+			{
+				s.push(pCur);
+				pCur = pCur->_pLeft;
+			}
+			//访问该结点
+			pCur = s.top();
+			cout << pCur->_data << " ";
+			s.pop();//访问完出栈
+			//将他的右孩子作为根结点
+			pCur = pCur->_pRight;
+		}
+	}
+	
+	//获取双亲
+	Node* GetParent(Node* x)
+	{
+		return _GetParent(_pRoot, x);
+	}
+    Node* _GetParent(Node* pRoot, Node* x)
+	{
+		if (NULL == pRoot || x == pRoot)
+			return NULL;
+		if (x == pRoot->_pLeft || x == pRoot->_pRight)
+			return pRoot;
+		Node* pCur = NULL;
+		if (pCur = _GetParent(pRoot->_pLeft, x))
+			return pCur;
+		if (pCur = _GetParent(pRoot->_pRight, x))
+			return pCur;
+		return NULL;
+	}
+	//查找值为value的结点
+	Node* Find(const T& value)
+	{
+		return _Find(_pRoot, value);
+	}
+	Node* _Find(Node* pRoot, const T& value)
+	{
+		if (NULL == pRoot)
+			return NULL;
+		if (pRoot->_data == value)
+			return pRoot;
+		Node* pCur = NULL;
+		if (pCur = _Find(pRoot->_pLeft, value))
+			return pCur;
+		if (pCur = _Find(pRoot->_pRight, value))
+			return pCur;
+		return NULL;
+	}
+    //获取左孩子
+	Node* GetLeftChild(Node* pCur)
+	{
+		return pCur->_pLeft;
+	}
+    //获取右孩子
+	Node* GetRightChild(Node* pCur)
+	{
+		return pCur->_pRight;
+	}
+    //高度
+	size_t Height()
+	{
+		return _Height(_pRoot);
+	}
+	size_t _Height(Node* pRoot)
+	{
+		if (NULL == pRoot)
+			return 0;
+		if (NULL == pRoot->_pLeft && NULL == pRoot->_pRight)
+			return 1;
+		size_t LeftHight = _Height(pRoot->_pLeft);
+		size_t RightHight = _Height(pRoot->_pRight);
+		return  LeftHight>RightHight ? LeftHight + 1 : RightHight+1;
+	}
+	//叶子结点个数
+	size_t GetLeefNode()
+	{
+		return _GetLeefNode(_pRoot);
+	}
+	size_t _GetLeefNode(Node* pRoot)
+	{
+		if (NULL == pRoot)
+			return 0;
+		if (pRoot->_pLeft == NULL && pRoot->_pRight == NULL)
+			return 1;
+		size_t Leftcount = _GetLeefNode(pRoot->_pLeft);
+		size_t Rightcount = _GetLeefNode(pRoot->_pRight);
+		return Leftcount > Rightcount ? Leftcount + 1 : Rightcount + 1;
+	}
+	//第k层结点个数
+	size_t GetKLevelNode(size_t k)
+	{
+		return _GetKLevelNode(_pRoot, k);
+	}
+	size_t _GetKLevelNode(Node* pRoot, size_t k)
+	{
+		if (NULL == pRoot || k<1 || k>_Height(pRoot))
+			return 0;
+		if (k == 1)
+			return 1;
+		return _GetKLevelNode(pRoot->_pLeft, k - 1) + _GetKLevelNode(pRoot->_pRight,k-1);
+	}
