@@ -1,10 +1,33 @@
 #pragma once
 #include<vector>
+#include<assert.h>
 #include<iostream>
 using namespace std;
+
+//仿函数
 template <class T>
+struct Less
+{
+	bool operator()(const T&  left, const T&  right)
+	{
+		return left < right;
+	}
+};
+
+template <class T>
+struct Greater
+{
+	bool operator()(const T& left, const T& right)
+	{
+		return left > right;
+	}
+};
+
+//template <class T,class Compare = Less<T>>//普通的模板参数
+template <class T, template<class> class Compare>//模板的模板参数
 class Heap
 {
+	typedef vector<T> Vector;
 public:
 	Heap()
 	{}
@@ -33,33 +56,46 @@ public:
 	}
 	void Insert(const T& data)
 	{
-		_heap.push_back(data);
+		_heap.push_back(data);//插入元素
+		if (_heap.size() == 1)
+			return;
 		int root = _heap.size()-1;
 		Adjustup(root);
 	}
 	void Remove()
 	{
-		std::swap(_heap[0],_heap[_heap.size()-1]);
+		assert(Empty());
+		std::swap(_heap[0], _heap[_heap.size() - 1]);//交换堆顶与堆最后一个元素
 		_heap.pop_back();
-		int root = (_heap.size() - 2) >> 1;
-		for (; root >= 0; root--)
-		{
-			Adjustdown(root);//从下向上调整
-		}
+		Adjustdown(0);//从下向上调整
+		
 	}
 
+	void HeapSort()
+	{
+		while (!Empty())
+		{
+			cout << _heap[0] << " ";
+			//swap(_heap[0],_heap[_heap.size()-1]);
+			Remove();
+		}
+	}
 protected:
 	void Adjustdown(int root)//从下向上调整
 	{
+		//Compare com;
+		Compare<T> com;
 		size_t child = 2 * root + 1;//左孩子
 		size_t parent = root;//双亲
 		while (child < _heap.size())
 		{
 			//右孩子存在的情况下，找左右孩子值最小的
-			if (child + 1 < _heap.size() && _heap[child] > _heap[child + 1])
+			//if (child + 1 < _heap.size() && _heap[child] > _heap[child + 1])
+			if (child + 1 < _heap.size() && com(_heap[child+1],_heap[child]))//
 				child += 1;
 			//判断值最小的孩子与双亲结点值得大小
-			if (_heap[child] < _heap[parent])
+			//if (_heap[child] < _heap[parent])
+			if (com(_heap[child],_heap[parent]))
 			{
 				std::swap(_heap[child], _heap[parent]);
 				parent = child;//重新设置双亲
@@ -72,17 +108,26 @@ protected:
 
 	void Adjustup(int root)
 	{
+		//Compare com;
+		Compare<T> com;
 		int child = root;
-		int parent = (child - 1)/2;
-		while (parent>=0 && _heap[child] < _heap[parent])
+		int parent = (child - 1)>>1;
+		while (child != 0)
 		{
+			//if (_heap[child] < _heap[parent])
+			if (com(_heap[child], _heap[parent]))
+			{
 				std::swap(_heap[child], _heap[parent]);
 				child = parent;
-				parent = (child - 1) / 2;
+				parent = (child - 1) >> 1;
+			}
+			else
+				return;
 		}
 	}
+
 protected:
-	std::vector<T> _heap;
+	Vector _heap;
 };
 
 
@@ -91,12 +136,14 @@ protected:
 void Test()
 {
 	int array[] = {53,17,78,9,45,65,87,23};
-	Heap<int> h(array,sizeof(array)/sizeof(array[0]));
+	//Heap<int,Greater<int>> h(array,sizeof(array)/sizeof(array[0]));
+	Heap<int, Greater> h(array, sizeof(array) / sizeof(array[0]));
+
 	//h.Remove();
-	h.Insert(12);
-	h.Insert(1);
 	h.Insert(0);
-	h.Insert(32);
 	h.Remove();
-	cout << h.Size() << endl;
+	//h.HeapSort();
+	//cout << h.Size() << endl;
+
 }
+
