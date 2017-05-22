@@ -128,6 +128,131 @@ public:
 	{
 		return _IsBlanceTree(_pRoot);
 	}
+
+	bool Remove(const K& key)//删除
+	{
+		if (NULL == _pRoot)
+			return false;
+		Node* pCur = _pRoot;
+		Node* parent = NULL;
+		while (pCur)
+		{
+			if (key < pCur->_key)
+			{
+				parent = pCur;
+				pCur = pCur->_pLeft;
+			}
+			else if (key>pCur->_key)
+			{
+				parent = pCur;
+				pCur = pCur->_pRight;
+			}
+			else
+			{
+				//parent = pCur;
+				break;
+			}
+		}
+		if (NULL == pCur)
+			return false;
+		
+		if (pCur->_pLeft == NULL || pCur->_pRight == NULL)
+		{
+			if (pCur == _pRoot)
+			{
+				_pRoot = pCur->_pRight;
+				delete pCur;
+			}
+			else if (pCur == parent->_pRight)
+			{
+				if (pCur->_pRight)
+				{
+					parent->_pRight = pCur->_pRight; parent->_bf--;
+				}
+				else
+				{
+					parent->_pRight = pCur->_pLeft; parent->_bf--;
+				}
+				delete pCur;
+
+			}
+			else if (pCur == parent->_pLeft)
+			{
+				if (pCur->_pRight)
+				{
+					parent->_pLeft = pCur->_pRight; parent->_bf++;
+				}
+				else
+				{
+					parent->_pLeft = pCur->_pLeft; parent->_bf++;
+				}
+				delete pCur;
+			}
+
+		}
+		else
+		{
+			//在右子树中找中序遍历的第一个节点
+			Node* prev = pCur;
+
+			pCur = pCur->_pRight;
+			while (pCur->_pLeft)
+			{
+				prev = pCur;
+				pCur = pCur->_pLeft;
+			}
+			if (prev->_pRight == pCur)
+			{
+				prev->_pRight = pCur->_pRight;
+				delete pCur;
+			}
+			else
+			{
+				parent->_key = pCur->_key;
+				parent->_value = pCur->_value;
+				delete pCur;
+			}
+			while (parent)
+			{
+				//1.判断是双亲的左孩子(--)或者右孩子(++)
+				if (pCur == parent->_pLeft)//放在循环里面
+					parent->_bf--;
+				else
+					parent->_bf++;
+				//2.如果parent的_bf等于0，就不在向上调整
+				if (parent->_bf == 0)
+					return true;
+				//3.向上调整
+				else if (parent->_bf == -1 || parent->_bf == 1)
+				{
+					pCur = parent;
+					parent = parent->_pParent;
+				}
+				else
+				{
+					if (parent->_bf == 2)
+					{
+						//1.左单旋
+						//2.先右后左
+						if (pCur->_bf == 1)
+							_RotateL(parent);
+						else
+							_RotateRL(parent);
+					}
+					else
+					{
+						//1.右单旋
+						//2.先左后右
+						if (pCur->_bf == -1)
+							_RotateR(parent);
+						else
+							_RotateLR(parent);
+					}
+					break;///????
+				}
+			}
+		}
+	}
 protected:
 	void _RotateL(Node* parent)
 	{
@@ -234,7 +359,7 @@ protected:
 			_TurnBlance(pRoot->_pRight);
 		}
 	}
-
+	/////面试题
 	bool _IsBlanceTree(Node* pRoot)
 	{
 		//树空
@@ -266,5 +391,11 @@ void TestAVL()
 		cout << "Yes" << endl;
 	else
 		cout << "No" << endl;
+	v.Remove(26);
+	if (v.IsBalanceTree())
+		cout << "Yes" << endl;
+	else
+		cout << "No" << endl;
+	v.InOrder();
 }
 
