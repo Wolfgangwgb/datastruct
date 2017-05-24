@@ -284,10 +284,25 @@ protected:
 	}
 	void _RotateRL(Node* parent)
 	{
+		Node* pSubR = parent->_pRight;
+		Node* pSubL = pSubR->_pLeft;
+		size_t tmp = pSubL->_bf;
+
 		_RotateR(parent->_pRight);
 		_RotateL(parent);
 		//更改平衡因子
-		_TurnBlance(_pRoot);
+		if (pSubR)
+		{
+			if (tmp == -1)
+			{
+				pSubR->_bf = 1;
+			}
+			else if (tmp == 1)
+			{
+				parent->_bf = -1;
+			}
+		}
+		//_TurnBlance(_pRoot);
 	}
 	void _RotateR(Node* parent)
 	{
@@ -319,10 +334,22 @@ protected:
 	}
 	void _RotateLR(Node* parent)
 	{
+		Node* pSubL = parent->_pLeft;
+		Node* pSubR = pSubL->_pRight;
+		size_t tmp = pSubL->_bf;
+
 		_RotateL(parent->_pLeft);
 		_RotateR(parent);
 		//更新平衡因子
-		_TurnBlance(_pRoot);
+		if (pSubR != _pRoot)
+		{
+			if (tmp == -1)
+				parent->_bf = 1;
+			else if (tmp == 1 && pSubL->_pLeft != NULL && pSubL->_pRight==NULL)
+				pSubL->_bf = -1;
+		}
+	
+		//_TurnBlance(_pRoot);
 	}
 
 	void _InOrder(Node* pRoot)
@@ -381,8 +408,8 @@ protected:
 
 void TestAVL()
 {
-	int array[] = {16, 3, 7, 11, 9, 26, 18, 14, 15};
-	//int array[] = { 4, 2, 6, 1, 3, 5, 15, 7, 16, 14 };
+	//int array[] = {16, 3, 7, 11, 9, 26, 18, 14, 15};
+	int array[] = { 4, 2, 6, 1, 3, 5, 15, 7, 16, 14 ,17,20};
 	AVLTree<int, int> v;
 	for (size_t idx = 0; idx < sizeof(array) / sizeof(array[0]); ++idx)
 		v.Insert(array[idx]);
