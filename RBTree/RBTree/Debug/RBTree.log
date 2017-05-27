@@ -1,9 +1,9 @@
-﻿生成启动时间为 2017/5/27 22:46:08。
+﻿生成启动时间为 2017/5/28 0:11:16。
      1>项目“F:\数据结构上机\RBTree\RBTree\RBTree.vcxproj”在节点 2 上(Build 个目标)。
      1>ClCompile:
          D:\vs2013\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt main.cpp
          main.cpp
-     1>f:\数据结构上机\rbtree\rbtree\rbtree.hpp(262): warning C4715: “RBTree<int,int>::Insert”: 不是所有的控件路径都返回值
+     1>f:\数据结构上机\rbtree\rbtree\rbtree.hpp(265): warning C4715: “RBTree<int,int>::Insert”: 不是所有的控件路径都返回值
        Link:
          D:\vs2013\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"F:\数据结构上机\RBTree\Debug\RBTree.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"F:\数据结构上机\RBTree\Debug\RBTree.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"F:\数据结构上机\RBTree\Debug\RBTree.lib" /MACHINE:X86 Debug\main.obj
          RBTree.vcxproj -> F:\数据结构上机\RBTree\Debug\RBTree.exe
@@ -11,4 +11,4 @@
 
 生成成功。
 
-已用时间 00:00:01.27
+已用时间 00:00:01.46

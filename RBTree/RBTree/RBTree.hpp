@@ -2,10 +2,9 @@
 #include<iostream>
 using namespace std;
 enum COLOR
-{
-	RED,
-	BLACK
-};
+{RED,BLACK};
+
+//红黑树结点结构
 template <class K,class V>
 struct RBTreeNode
 {
@@ -24,6 +23,8 @@ struct RBTreeNode
 	V _value;
 	COLOR _color;
 };
+
+//迭代器结构
 template <class K,class V,class Ref,class Ptr>
 class RBTreeIterator
 {
@@ -34,11 +35,12 @@ public:
 	RBTreeIterator()
 		:_pNode(NULL)
 	{}
-	RBTreeIterator(const self& s)
-		:_pNode(s._pNode)
-	{}
+
 	RBTreeIterator(Node* pNode)
 		:_pNode(pNode)
+	{}
+	RBTreeIterator(const self& s)
+		:_pNode(s._pNode)
 	{}
 	self& operator++()
 	{
@@ -91,7 +93,7 @@ protected:
 		{
 			Node* parent = _pNode->_pParent;
 			//右单支
-			while (parent && parent->_pRight == _pNode)
+			while (parent->_pRight == _pNode)
 			{
 				_pNode = parent;
 				parent = parent->_pParent;
@@ -115,7 +117,7 @@ protected:
 		else
 		{
 			Node* parent = _pNode->_pParent;
-			while (parent && parent->_pLeft == _pNode)
+			while (parent->_pLeft == _pNode)
 			{
 				_pNode = parent;
 				parent = parent->_pParent;
@@ -125,8 +127,9 @@ protected:
 	}
 private:
 	Node* _pNode;
-};
+}; 
 
+//红黑树
 template <class K,class V>
 class RBTree
 {
@@ -152,7 +155,7 @@ public:
 	}
 	bool Insert(const K& key = K(), const V& value = V())
 	{
-		Node* pRoot = GetRoot();
+		Node*& pRoot = GetRoot();
 		//树为空
 		if (NULL == pRoot)
 		{
@@ -288,9 +291,9 @@ public:
 		}
 		return _CheckRBTree(pRoot, BlackCount, 0);
 	}
-	Node* Find(const K& key)
+	Iterator Find(const K& key)
 	{
-		return _Find(key);
+		return Iterator(_Find(key));
 	}
 	bool Empty()
 	{
@@ -327,6 +330,8 @@ protected:
 	Node* GetMinNode()
 	{
 		Node* pRoot = GetRoot();
+		if (NULL == pRoot)
+			return _pRoot;////???
 		while (pRoot->_pLeft)
 			pRoot = pRoot->_pLeft;
 		return pRoot;
@@ -334,6 +339,8 @@ protected:
 	Node* GetMaxNode()
 	{
 		Node* pRoot = GetRoot();
+		if (NULL == pRoot)
+			return _pRoot;//???
 		while (pRoot->_pRight)
 			pRoot = pRoot->_pRight;
 		return pRoot;
@@ -451,7 +458,7 @@ void Test()
 		cout << *it << " ";
 		++it;
 	}
-	RBTreeNode<int, int>* Node = b.Find(11);
+	RBTree<int, int>::Iterator it2 = b.Find(11);
 	cout << b.Size() << endl;
 	it1--;
 	cout << *it1 << endl;
