@@ -9,7 +9,7 @@ enum COLOR
 template <class K,class V>
 struct RBTreeNode
 {
-	RBTreeNode(const K& key, const V& value = V())
+	RBTreeNode(const K& key = K(), const V& value = V())
 	:_pLeft(NULL)
 	, _pRight(NULL)
 	, _pParent(NULL)
@@ -24,26 +24,145 @@ struct RBTreeNode
 	V _value;
 	COLOR _color;
 };
+template <class K,class V,class Ref,class Ptr>
+class RBTreeIterator
+{
+	typedef RBTreeNode<K, V> Node;
+	typedef RBTreeIterator<K, V, Ref,Ptr> self;
+	typedef Node* Ptr;
+public:
+	RBTreeIterator()
+		:_pNode(NULL)
+	{}
+	RBTreeIterator(const self& s)
+		:_pNode(s._pNode)
+	{}
+	RBTreeIterator(Node* pNode)
+		:_pNode(pNode)
+	{}
+	self& operator++()
+	{
+		Increment(_pNode);
+		return *this;
+	}
+	self operator++(int)
+	{
+		self temp(*this);
+		Increment(_pNode);
+		return temp;
+	}
+	self& operator--()
+	{
+		Decrement(_pNode);
+		return *this;
+	}
+	self operator--(int)
+	{
+		self temp(*this);
+		Decrement(_pNode);
+		return temp;
+	}
+	Ref& operator*()
+	{
+		return _pNode->_key;
+	}
+	Ptr operator->()
+	{
+		return &(operator*());
+	}
+	bool operator==(const self& s)
+	{
+		return _pNode == s._pNode;
+	}
+	bool operator!=(const self& s)
+	{
+		return _pNode != s._pNode;
+	}
+protected:
+	Node* Increment(Node* pNode)
+	{
+		if (pNode->_pRight)
+		{
+			pNode = pNode->_pRight;
+			while (pNode->_pLeft)
+				pNode = pNode->_pLeft;
+		}
+		else
+		{
+			Node* parent = pNode->_pParent;
+			//右单支
+			while (parent && parent->_pRight == pNode)
+			{
+				pNode = parent;
+				parent = parent->_pParent;
+			}
+			if (pNode->_pRight != parent)//左单支，根结点有右孩子，如果不判断直接跳到结尾
+				pNode = parent;
+		}
+		_pNode = pNode;
+		return pNode;
+	}
+	Node* Decrement(Node* pNode)
+	{
+		if (pNode->_pLeft)
+		{
+			pNode = pNode->_pLeft;
+			while (pNode->_pRight)
+				pNode = pNode->_pRight;
+		}
+		else
+		{
+			Node* parent = pNode->_pParent;
+			while (parent && parent->_pLeft == pNode)
+			{
+				pNode = parent;
+				parent = parent->_pParent;
+			}
+			pNode = parent;
+		}
+		_pNode = pNode;
+		return pNode;
+	}
+private:
+	Node* _pNode;
+};
 
 template <class K,class V>
 class RBTree
 {
 	typedef RBTreeNode<K, V> Node;
 public:
+	typedef RBTreeIterator<K, V, K&, K*> Iterator;
+public:
 	RBTree()
-		:_pRoot(NULL)
-	{}
-
-	bool Insert(const K& key, const V& value = V())
 	{
+		_pRoot = new Node();
+		_pRoot->_pLeft = _pRoot;
+		_pRoot->_pRight = _pRoot;
+		_pRoot->_pParent = NULL;
+	}
+	Iterator Begin()
+	{
+		return Iterator(_pRoot->_pLeft);
+	}
+	Iterator End()
+	{
+		return Iterator(_pRoot);
+	}
+	bool Insert(const K& key = K(), const V& value = V())
+	{
+		Node* pRoot = GetRoot();
 		//树为空
-		if (NULL == _pRoot)
+		if (NULL == pRoot)
 		{
-			_pRoot = new Node(key, value);
-			_pRoot->_color = BLACK;
+			pRoot = new Node(key);
+			pRoot->_color = BLACK;
+			pRoot->_pParent = _pRoot;
+			_pRoot->_pParent = pRoot;
 			return true;
 		}
-		Node* pCur = _pRoot;
+		//查找插入位置
+		Node* pCur = pRoot;
 		Node* parent = NULL;
 		while (pCur)
 		{
@@ -71,12 +190,15 @@ public:
 		//树不空
 		//左
 		//右
-		while (pCur != _pRoot && RED == parent->_color)
+		while (pCur != pRoot && RED == parent->_color)
 		{
 			Node* Grandfather = parent->_pParent;
+			//根据parent是grandfather的左孩子或者右孩子分为两个大的分支
+			//每个分支包含三种小情况
 			if (parent == Grandfather->_pLeft)
 			{
 				Node* Uncle = Grandfather->_pRight;
+				//根据叔叔结点的情况分离情况3和情况4，5
 				//情况3
 				if (Uncle && RED == Uncle->_color)
 				{
@@ -89,10 +211,11 @@ public:
 				}
 				else
 				{
+					//情况5经过一次旋转后变为情况4，
 					//先处理情况5
 					if (pCur == parent->_pRight)
 					{
-						_RotateL(parent);
+						_RotateL(parent);//分清楚应给从哪个结点开始调整
 						std::swap(parent,pCur);
 					}
 					//情况4
@@ -129,37 +252,87 @@ public:
 				}
 			}
 		}
-		_pRoot->_color = BLACK;
+		pRoot->_color = BLACK;
+		_pRoot->_pLeft = GetMinNode();
+		_pRoot->_pRight = GetMaxNode();
 	}
 	void InOrder()
 	{
+		Node* pRoot = GetRoot();
 		cout << "InOrder :";
-		_InOrder(_pRoot);
+		_InOrder(pRoot);
 		cout << endl;
 	}
 	bool CheckRBTree()
 	{
-		if (_pRoot == NULL)
+		Node* pRoot = GetRoot();
+		if (pRoot == NULL)
 			return true;
-		if (NULL == _pRoot->_pLeft && NULL == _pRoot->_pRight)
+		if (NULL == pRoot->_pLeft && NULL == pRoot->_pRight)
 		{
-			if (RED == _pRoot->_color)
+			if (RED == pRoot->_color)
 				cout << "违反了性质2" << endl;
 		}
-
+		//统计一条路径上的黑色结点数
 		size_t BlackCount = 0;
-		Node* pCur = _pRoot;
+		Node* pCur = pRoot;
 		while (pCur)
 		{
 			if (pCur->_color == BLACK)
 				BlackCount++;
 			pCur = pCur->_pLeft;
 		}
-		return _CheckRBTree(_pRoot,BlackCount,0);
+		return _CheckRBTree(pRoot, BlackCount, 0);
 	}
+	Node* Find(const K& key)
+	{
+		return _Find(key);
+	}
+	bool Empty()
+	{
+		if (_pRoot->_pParent)
+			return true;
+		else
+			return false;
+	}
+
 protected:
+
+	Node* _Find(const K key)
+	{
+		Node* pRoot = GetRoot();
+		if (NULL == pRoot)
+			return NULL;
+		while (key != pRoot->_key)
+		{
+			 if (key < pRoot->_key)
+				pRoot = pRoot->_pLeft;
+			else
+				pRoot = pRoot->_pRight;
+		}
+		return pRoot;
+	}
+	Node*& GetRoot() //???&
+	{
+		return _pRoot->_pParent;
+	}
+	Node* GetMinNode()
+	{
+		Node* pRoot = GetRoot();
+		while (pRoot->_pLeft)
+			pRoot = pRoot->_pLeft;
+		return pRoot;
+	}
+	Node* GetMaxNode()
+	{
+		Node* pRoot = GetRoot();
+		while (pRoot->_pRight)
+			pRoot = pRoot->_pRight;
+		return pRoot;
+	}
 	void _RotateL(Node* parent)
 	{
+		Node* pRoot = GetRoot();
 		Node* pSubR = parent->_pRight;
 		Node* pSubL = pSubR->_pLeft;
 
@@ -170,9 +343,10 @@ protected:
 		Node* pparent = parent->_pParent;
 		parent->_pParent = pSubR;
 		pSubR->_pParent = pparent;
-		if (NULL == pparent)
+		if (_pRoot == pparent)//更改，原来pparent ==  NULL
 		{
-			_pRoot = pSubR;
+			pRoot = pSubR;
+			_pRoot->_pParent = pRoot;
 		}
 		else
 		{
@@ -184,6 +358,7 @@ protected:
 	}
 	void _RotateR(Node* parent)
 	{
+		Node* pRoot = GetRoot();
 		Node* pSubL = parent->_pLeft;
 		Node* pSubR = pSubL->_pRight;
 
@@ -195,9 +370,11 @@ protected:
 		parent->_pParent = pSubL;
 		pSubL->_pParent = pparent;
 
-		if (NULL == pparent)
+		
+		if (_pRoot == pparent)//更改，原来pparent ==  NULL
 		{
-			_pRoot = pSubL;
+			pRoot = pSubL;
+			_pRoot->_pParent = pRoot;//更改
 		}
 		else
 		{
@@ -255,6 +432,16 @@ void Test()
 	RBTree<int, int> b;
 	for (size_t idx = 0; idx < sizeof(a) / sizeof(a[0]); ++idx)
 		b.Insert(a[idx]);
-	b.InOrder();
-	b.CheckRBTree();
+	//b.InOrder();
+	//b.CheckRBTree();
+	RBTree<int, int>::Iterator it = b.Begin();
+	RBTree<int, int>::Iterator it1 = b.End();
+
+	while (it != b.End())
+	{
+		cout << *it << " ";
+		++it;
+	}
+	RBTreeNode<int, int>* Node = b.Find(11);
+	size_t i = b.Size();
 }
