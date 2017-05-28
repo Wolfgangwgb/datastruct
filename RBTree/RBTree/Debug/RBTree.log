@@ -1,4 +1,4 @@
-﻿生成启动时间为 2017/5/28 0:11:16。
+﻿生成启动时间为 2017/5/28 16:55:35。
      1>项目“F:\数据结构上机\RBTree\RBTree\RBTree.vcxproj”在节点 2 上(Build 个目标)。
      1>ClCompile:
          D:\vs2013\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt main.cpp
@@ -11,4 +11,4 @@
 
 生成成功。
 
-已用时间 00:00:01.46
+已用时间 00:00:01.36

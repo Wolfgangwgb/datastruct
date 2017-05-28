@@ -295,9 +295,11 @@ public:
 	{
 		return Iterator(_Find(key));
 	}
-	bool Empty()
+	bool Empty()const
 	{
-		if (_pRoot->_pParent)
+		//return _Size == 0;
+
+		if (NULL == _pRoot->_pParent)
 			return true;
 		else
 			return false;
